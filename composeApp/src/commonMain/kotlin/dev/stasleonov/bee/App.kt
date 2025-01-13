@@ -1,6 +1,11 @@
 package dev.stasleonov.bee
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -13,6 +18,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,12 +46,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import clappybee.composeapp.generated.resources.Res
 import clappybee.composeapp.generated.resources.background
 import clappybee.composeapp.generated.resources.bee_sprite
+import clappybee.composeapp.generated.resources.moving_background
 import com.stevdza_san.sprite.component.drawSpriteView
 import com.stevdza_san.sprite.domain.SpriteSheet
 import com.stevdza_san.sprite.domain.SpriteSpec
@@ -109,12 +117,62 @@ fun App() {
             }
         }
 
-        Box(modifier = Modifier.fillMaxSize()) {
+        val backgroundOffsetX = remember { Animatable(0f) }
+        var imageWidth by remember { mutableStateOf(0) }
+
+        LaunchedEffect(game.status) {
+            while (game.status == GameStatus.Started) {
+                backgroundOffsetX.animateTo(
+                    targetValue = -imageWidth.toFloat(),
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(
+                            durationMillis = 4000,
+                            easing = LinearEasing
+                        ),
+                        repeatMode = RepeatMode.Restart
+                    )
+                )
+            }
+        }
+
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomCenter
+        ) {
             Image(
                 modifier = Modifier.fillMaxSize(),
                 painter = painterResource(Res.drawable.background),
                 contentDescription = "Background image",
                 contentScale = ContentScale.Crop
+            )
+            Image(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .onSizeChanged {
+                        imageWidth = it.width
+                    }
+                    .offset {
+                        IntOffset(
+                            x = backgroundOffsetX.value.toInt(),
+                            y = 0
+                        )
+                    },
+                painter = painterResource(Res.drawable.moving_background),
+                contentDescription = "Moving Background image",
+                contentScale = ContentScale.FillHeight
+            )
+            Image(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .offset {
+                        IntOffset(
+                            x = backgroundOffsetX.value.toInt() + imageWidth,
+                            y = 0
+                        )
+                    },
+                painter = painterResource(Res.drawable.moving_background),
+                contentDescription = "Moving Background image",
+                contentScale = ContentScale.FillHeight
             )
         }
 
