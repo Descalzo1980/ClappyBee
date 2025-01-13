@@ -1,14 +1,11 @@
 package dev.stasleonov.bee
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,7 +15,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -37,6 +33,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Alignment
@@ -65,6 +62,7 @@ import dev.stasleonov.bee.domain.Game
 import dev.stasleonov.bee.domain.GameStatus
 import dev.stasleonov.bee.ui.orange
 import dev.stasleonov.bee.util.ChewyFontFamily
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.imageResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -78,7 +76,7 @@ fun App() {
     MaterialTheme {
         var screenWidth by remember { mutableStateOf(0) }
         var screenHeight by remember { mutableStateOf(0) }
-        var game by remember{ mutableStateOf(Game()) }
+        var game by remember { mutableStateOf(Game()) }
 
         val spriteState = rememberSpriteState(
             totalFrames = 9,
@@ -99,25 +97,25 @@ fun App() {
         val currentFrame by spriteState.currentFrame.collectAsState()
         val sheetImage = spriteSpec.imageBitmap
         val animateAngle by animateFloatAsState(
-            targetValue = when{
+            targetValue = when {
                 game.beeVelocity > game.beeMaxVelocity / 1.1 -> 30f
                 else -> 0f
             }
         )
-        DisposableEffect(Unit){
+        DisposableEffect(Unit) {
             onDispose {
                 spriteState.stop()
                 spriteState.cleanup()
             }
         }
 
-        LaunchedEffect(game.status){
-            while(game.status == GameStatus.Started) {
+        LaunchedEffect(game.status) {
+            while (game.status == GameStatus.Started) {
                 withFrameMillis {
                     game.updateGameProgress()
                 }
             }
-            if(game.status == GameStatus.Over) {
+            if (game.status == GameStatus.Over) {
                 spriteState.stop()
             }
         }
@@ -126,21 +124,21 @@ fun App() {
         var imageWidth by remember { mutableStateOf(0) }
         val pipeImage = imageResource(Res.drawable.pipe)
         val pipeCapImage = imageResource(Res.drawable.pipe_cap)
-
-        LaunchedEffect(game.status) {
-            while (game.status == GameStatus.Started) {
-                backgroundOffsetX.animateTo(
-                    targetValue = -imageWidth.toFloat(),
-                    animationSpec = infiniteRepeatable(
-                        animation = tween(
-                            durationMillis = 4000,
-                            easing = LinearEasing
-                        ),
-                        repeatMode = RepeatMode.Restart
-                    )
-                )
-            }
-        }
+        val scope = rememberCoroutineScope()
+        /*        LaunchedEffect(game.status) {
+                    while (game.status == GameStatus.Started) {
+                        backgroundOffsetX.animateTo(
+                            targetValue = -imageWidth.toFloat(),
+                            animationSpec = infiniteRepeatable(
+                                animation = tween(
+                                    durationMillis = 4000,
+                                    easing = LinearEasing
+                                ),
+                                repeatMode = RepeatMode.Restart
+                            )
+                        )
+                    }
+                }*/
 
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -158,12 +156,13 @@ fun App() {
                     .onSizeChanged {
                         imageWidth = it.width
                     }
-                    .offset {
-                        IntOffset(
-                            x = backgroundOffsetX.value.toInt(),
-                            y = 0
-                        )
-                    },
+                    .then(
+                        if (game.status == GameStatus.Started)
+                            Modifier.basicMarquee(
+                                initialDelayMillis = 0,
+                                velocity = 50.dp
+                            ) else Modifier
+                    ),
                 painter = painterResource(Res.drawable.moving_background),
                 contentDescription = "Moving Background image",
                 contentScale = ContentScale.FillHeight
@@ -171,12 +170,13 @@ fun App() {
             Image(
                 modifier = Modifier
                     .fillMaxSize()
-                    .offset {
-                        IntOffset(
-                            x = backgroundOffsetX.value.toInt() + imageWidth,
-                            y = 0
-                        )
-                    },
+                    .then(
+                        if (game.status == GameStatus.Started)
+                            Modifier.basicMarquee(
+                                initialDelayMillis = 0,
+                                velocity = 50.dp
+                            ) else Modifier
+                    ),
                 painter = painterResource(Res.drawable.moving_background),
                 contentDescription = "Moving Background image",
                 contentScale = ContentScale.FillHeight
@@ -193,23 +193,23 @@ fun App() {
                         screenHeight = size.height
                         game = game.copy(
                             screenWidth = size.width,
-                            screenHeight= size.height
+                            screenHeight = size.height
                         )
                     }
                 }
                 .clickable {
-                    if(game.status == GameStatus.Started) {
+                    if (game.status == GameStatus.Started) {
                         game.jump()
                     }
                 }
-        ){
+        ) {
             rotate(
                 degrees = animateAngle,
                 pivot = Offset(
                     x = game.bee.x - game.beeRadius,
-                    y = game.bee.y- game.beeRadius,
+                    y = game.bee.y - game.beeRadius,
                 ),
-            ){
+            ) {
                 drawSpriteView(
                     spriteState = spriteState,
                     spriteSpec = spriteSpec,
@@ -290,38 +290,38 @@ fun App() {
             )
         }
         if (game.status == GameStatus.Idle) {
-           Box(
-               modifier = Modifier
-                   .fillMaxSize()
-                   .background(color = Color.Black.copy(alpha = 0.5f)),
-               contentAlignment = Alignment.Center
-           ){
-               Button(
-                   modifier = Modifier.height(54.dp),
-                   shape = RoundedCornerShape(size = 20.dp),
-                   colors = ButtonDefaults.buttonColors(
-                       containerColor = orange
-                   ),
-                   onClick = {
-                       game.start()
-                       spriteState.start()
-                   }
-               ){
-                   Icon(
-                       imageVector = Icons.Default.PlayArrow,
-                       contentDescription = null,
-                       tint = Color.White
-                   )
-                   Spacer(modifier = Modifier.width(6.dp))
-                   Text(
-                       text = "START",
-                       fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                       fontFamily = ChewyFontFamily()
-                   )
-               }
-           }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(color = Color.Black.copy(alpha = 0.5f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Button(
+                    modifier = Modifier.height(54.dp),
+                    shape = RoundedCornerShape(size = 20.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = orange
+                    ),
+                    onClick = {
+                        game.start()
+                        spriteState.start()
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = null,
+                        tint = Color.White
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = "START",
+                        fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                        fontFamily = ChewyFontFamily()
+                    )
+                }
+            }
         }
-        if(game.status == GameStatus.Over) {
+        if (game.status == GameStatus.Over) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -351,6 +351,9 @@ fun App() {
                     onClick = {
                         game.restartGame()
                         spriteState.start()
+                        scope.launch {
+                            backgroundOffsetX.snapTo(0f)
+                        }
                     }
                 ) {
                     Icon(
