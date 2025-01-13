@@ -42,6 +42,7 @@ import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.layout.ContentScale
@@ -212,6 +213,24 @@ fun App() {
                         x = (game.bee.x - game.beeRadius).toInt(),
                         y = (game.bee.y - game.beeRadius).toInt(),
                     )
+                )
+            }
+            game.pipePairs.forEach { pipePair ->
+                drawRect(
+                    color = Color.Blue,
+                    topLeft = Offset(
+                        x = pipePair.x - game.pipeWidth / 2,
+                        y = 0f
+                    ),
+                    size = Size(game.pipeWidth, pipePair.topHeight)
+                )
+                drawRect(
+                    color = Color.Blue,
+                    topLeft = Offset(
+                        x = pipePair.x - game.pipeWidth / 2,
+                        y = pipePair.y + game.pipeGapSize / 2
+                    ),
+                    size = Size(game.pipeWidth, pipePair.bottomHeight)
                 )
             }
         }
