@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -223,6 +224,36 @@ fun App() {
                     fontSize = MaterialTheme.typography.displayMedium.fontSize,
                     fontFamily = ChewyFontFamily()
                 )
+                Text(
+                    text = "SCORE: 0",
+                    color = Color.White,
+                    fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                    fontFamily = ChewyFontFamily()
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                Button(
+                    modifier = Modifier.height(54.dp),
+                    shape = RoundedCornerShape(size = 20.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = orange
+                    ),
+                    onClick = {
+                        game.restartGame()
+                        spriteState.start()
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = null,
+                        tint = Color.White
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = "RESTART",
+                        fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                        fontFamily = ChewyFontFamily()
+                    )
+                }
             }
         }
     }

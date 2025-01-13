@@ -39,6 +39,16 @@ data class Game(
         beeVelocity = beeJumpImpulse
     }
 
+    fun restartGame() {
+        resetBeePosition()
+        start()
+    }
+
+    private fun resetBeePosition() {
+        bee =  bee.copy(y = (screenHeight / 2).toFloat())
+        beeVelocity = 0f
+    }
+
     fun updateGameProgress() {
         if (bee.y < 0) {
             stopTheBee()
