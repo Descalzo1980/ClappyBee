@@ -1,6 +1,8 @@
 package dev.stasleonov.bee.di
 
-import org.koin.core.module.Module
+import dev.stasleonov.bee.domain.AudioPlayer
+import org.koin.dsl.module
 
-actual val targetModule: Module
-    get() = TODO("Not yet implemented")
+actual val targetModule = module {
+    single<AudioPlayer> { AudioPlayer() }
+}

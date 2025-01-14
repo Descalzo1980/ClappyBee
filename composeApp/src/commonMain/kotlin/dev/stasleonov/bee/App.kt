@@ -129,20 +129,6 @@ fun App() {
         val pipeImage = imageResource(Res.drawable.pipe)
         val pipeCapImage = imageResource(Res.drawable.pipe_cap)
         val scope = rememberCoroutineScope()
-        /*        LaunchedEffect(game.status) {
-                    while (game.status == GameStatus.Started) {
-                        backgroundOffsetX.animateTo(
-                            targetValue = -imageWidth.toFloat(),
-                            animationSpec = infiniteRepeatable(
-                                animation = tween(
-                                    durationMillis = 4000,
-                                    easing = LinearEasing
-                                ),
-                                repeatMode = RepeatMode.Restart
-                            )
-                        )
-                    }
-                }*/
 
         Box(
             modifier = Modifier.fillMaxSize(),
