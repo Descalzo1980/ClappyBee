@@ -7,6 +7,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -62,6 +63,7 @@ import dev.stasleonov.bee.domain.Game
 import dev.stasleonov.bee.domain.GameStatus
 import dev.stasleonov.bee.ui.orange
 import dev.stasleonov.bee.util.ChewyFontFamily
+import dev.stasleonov.bee.util.getPlatform
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.imageResource
 import org.jetbrains.compose.resources.painterResource
@@ -74,9 +76,10 @@ const val PIP_CAP_HEIGHT = 50f
 @Preview
 fun App() {
     MaterialTheme {
+        val platform = remember { getPlatform() }
         var screenWidth by remember { mutableStateOf(0) }
         var screenHeight by remember { mutableStateOf(0) }
-        var game by remember { mutableStateOf(Game()) }
+        var game by remember { mutableStateOf(Game(platform = platform)) }
 
         val spriteState = rememberSpriteState(
             totalFrames = 9,
@@ -198,7 +201,10 @@ fun App() {
                         )
                     }
                 }
-                .clickable {
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
                     if (game.status == GameStatus.Started) {
                         game.jump()
                     }
