@@ -139,7 +139,11 @@ data class Game(
         pipePairs.forEach { it.x -=pipeVelocity }
         pipePairs.removeAll { it.x + pipeWidth < 0 }
 
-        if (pipePairs.isEmpty() || pipePairs.last().x < screenWidth / 2) {
+        val isLandscape = screenWidth > screenHeight
+        val spawnThreshold = if(isLandscape) screenWidth / 1.25
+        else screenWidth / 2.0
+
+        if (pipePairs.isEmpty() || pipePairs.last().x < spawnThreshold) {
             val initialPipeX = screenWidth.toFloat() + pipeWidth
             val topHeight = Random.nextFloat() * (screenHeight / 2)
             val bottomHeight = screenHeight - topHeight - pipeGapSize
