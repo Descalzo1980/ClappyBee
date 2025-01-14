@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.russhwolf.settings.ObservableSettings
+import dev.stasleonov.bee.util.Platform
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.random.Random
@@ -12,15 +13,16 @@ import kotlin.random.Random
 const val SCORE_KEY = "score"
 
 data class Game(
+    val platform: Platform,
     val screenWidth: Int = 0,
     val screenHeight: Int = 0,
-    val gravity: Float = 0.5f,
+    val gravity: Float = 0.8f,
     val beeRadius: Float = 30f,
     val beeJumpImpulse: Float = -12f,
-    val beeMaxVelocity: Float = 25f,
+    val beeMaxVelocity: Float = if(platform == Platform.ANDROID) 25f else 10f,
     val pipeWidth: Float = 150f,
-    val pipeVelocity: Float = 5f,
-    val pipeGapSize: Float = 250f
+    val pipeVelocity: Float = if(platform == Platform.ANDROID) 3f else 2.5f,
+    val pipeGapSize: Float = if(platform == Platform.ANDROID) 250f else 300f
 ): KoinComponent {
 
     private val audioPlayer: AudioPlayer by inject()
